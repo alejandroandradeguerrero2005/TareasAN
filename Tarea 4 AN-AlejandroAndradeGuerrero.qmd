@@ -1,0 +1,130 @@
+---
+title: "Capitulo 4"
+author: "Alejandro Andrade Guerrero"
+format: html
+editor: visual
+---
+
+```{python}
+#| code-fold: true
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+ 
+
+```
+
+```{python}
+#| code-fold: true
+import os
+
+print("Archivos en la carpeta actual:")
+print(os.listdir())
+```
+
+*Series temporales: Una serie temporal es un conjunto de datos recopilados y ordenados según el tiempo, como las ventas diarias o la temperatura mensual. Se analizan para identificar patrones como tendencias, estacionalidades o ciclos, y así poder entender el comportamiento pasado y hacer predicciones sobre el futuro. Son muy útiles en áreas como la economía, la meteorología y la planificación empresarial.*
+
+***Ejercicio Tipo de cambio Dolares (USD) y pesos mexicanos(MXN)***
+
+```{python}
+#| code-fold: true
+
+df = pd.read_csv("usd_mxn.csv")
+print("Columnas del archivo:", df.columns)
+df['Date'] = pd.to_datetime(df['Date'])
+df.set_index('Date', inplace=True)
+df['Price'] = pd.to_numeric(df['Price'], errors='coerce')
+df.dropna(subset=['Price'], inplace=True)
+```
+
+***Grafica***
+
+```{python}
+#| code-fold: true
+plt.plot(df.index, df['Price'])
+plt.title('Tipo de Cambio Dolares/MXN')
+plt.xlabel('Fecha')
+plt.ylabel('Precio (USD/MXN)')
+plt.grid(True)
+plt.show()
+
+```
+
+***Comparación mensual***
+
+```{python}
+#| code-fold: true
+df_filtered = df[(df.index.year >= 2020) & (df.index.year <= 2025)].copy()
+df_filtered['Año'] = df_filtered.index.year
+df_filtered['Mes'] = df_filtered.index.month
+monthly_avg = df_filtered.groupby(['Año', 'Mes'])['Price'].mean().unstack(level=0)
+monthly_avg.plot(figsize=(12,6), marker='o')
+plt.title('Comparación Mensual del Tipo de Cambio DolaresUSD/PesosMXN 20-25')
+plt.xlabel('Mes')
+plt.ylabel('Promedio Mensual Dolares(USD)/Pesos (MXN)')
+plt.xticks(ticks=range(1,13), labels=[
+    'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+    'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'
+])
+plt.legend(title='Año')
+plt.grid(True)
+plt.show()
+```
+
+***Promedio anual***
+
+```{python}
+#| code-fold: true
+df['Año'] = df.index.year
+promedio_anual = df.groupby('Año')['Price'].mean()
+
+promedio_anual.plot(kind='bar', color="red")
+plt.title('Promedio Anual Dolares (USD)/Pesos (MXN)')
+plt.ylabel('Tipo de Cambio')
+plt.xlabel('Año')
+plt.grid(axis='y')
+plt.show()
+```
+
+***Boxplot***
+
+```{python}
+#| code-fold: true
+df['Trimestre'] = df.index.to_period('Q').astype(str)
+
+sns.boxplot(x='Trimestre', y='Price', data=df)
+plt.title('Boxplot Trimestral Dolares/Pesos Mexicanos)
+plt.xticks(rotation=45)
+plt.show()
+```
+
+***Autocorrelación***
+
+```{python}
+#| code-fold: true
+from pandas.plotting import autocorrelation_plot
+autocorrelation_plot(df['Price'])
+plt.title('Autocorrelación Muestral Dolares/ Pesos Mexicanos
+plt.show()
+```
+
+***Diferenciación***
+
+*Cuando una serie temporal no es estacionaria, es decir, cuando presenta una tendencia o sus características estadísticas varían a lo largo del tiempo, una técnica comúnmente utilizada para estabilizarla es la diferenciación. Este proceso consiste en calcular las diferencias entre valores consecutivos de la serie, lo que ayuda a eliminar la tendencia y a hacer que la serie tenga propiedades más constantes en el tiempo. De esta manera, la diferenciación facilita el análisis y la modelación de la serie, permitiendo aplicar métodos estadísticos que requieren estacionariedad.*
+
+```{python}
+#| code-fold: true
+df['Price_diff'] = df['Price'].diff()
+
+# Serie diferenciada
+plt.figure(figsize=(12, 5))
+plt.plot(df.index, df['Price_diff'], color='purple')
+plt.title('Diferenciación del Tipo de cambiod dolaeres vs Pesos mecianos 
+plt.xlabel('Fecha')
+plt.ylabel('Price')
+plt.grid(True)
+plt.show()
+```
+
+# 
