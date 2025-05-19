@@ -42,24 +42,30 @@ library (dplyr)
 
 knitr::knit_hooks$set(webgl = hook_webgl)
 ```
-INEGI 
+
 
 ```{r}
 inegi_data <- read_xlsx("C:/Users/kelip/OneDrive/Documentos/Análisis Numérico/Tareas/inegi_subdata.xlsx")
 ```
 
-Analisis Correlación
+Actividades Primarias vs Terciarias
+```{r}
+modelo_construccion <- lm(Actividades_Primarias ~ Actividades_Terciarias, data = inegi_data)
+summary(modelo_construccion)
+ggplot(inegi_data, aes(x = Actividades_Terciarias, y = Actividades_Primarias)) +
+  geom_point(color = "darkblue") +
+  geom_smooth(method = "lm", color = "red") +
+  labs(title = "Actividad_Terciaria vs. Actividad_Primaria",
+       x = "Actividad_Terciaria",
+       y = "Actividad_Primaria") +
+  theme_minimal()
 
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-data_numeric <- inegi_data %>% select_if(is.numeric)
 
-corr_matrix <- cor(data_numeric, use= "complete.obs")
+Analisis
+Las actividades primarias abarcan principalmente la obtención directa de recursos naturales, tales como la agricultura, la ganadería, la pesca, la minería y la silvicultura. Por su parte, las actividades terciarias se enfocan en la provisión de servicios que satisfacen diversas necesidades de la sociedad, como el comercio, el transporte, el turismo, la educación, la salud y los servicios financieros.
 
-print("Análisis de Correlación:")
-print(corr_matrix)
-```
+Desde el punto de vista económico, comparar estos dos sectores pone de manifiesto diferencias esenciales en cuanto a su grado de desarrollo, la generación de valor agregado, su vulnerabilidad a factores externos y el rol que desempeñan dentro de la estructura económica naciona
 
-Regresiones 
 
 
 Precios Consumidor vs Actividades Terciarias 
@@ -80,8 +86,7 @@ ggplot(data = inegi_data, aes(x = Actividades_Terciarias, y = Precios_Consumidor
   theme_bw()
 ```
 
-Los resultados de este modelo indican una conexión clara, positiva y robusta entre el sector de servicios y lo que pagamos por los bienes y servicios. La mayor parte de las variaciones en los precios al consumidor se deben a los cambios en las actividades terciarias. Es más, por cada 'unidad' que crecen las actividades de servicios, los precios que vemos en el mercado tienden a aumentar casi el doble."
-
+Los hallazgos de este modelo muestran que existe una relación clara, positiva y significativa entre el sector de servicios y los precios que pagamos por bienes y servicios. La mayoría de las fluctuaciones en los precios al consumidor pueden atribuirse a las variaciones en las actividades terciarias. De hecho, por cada incremento de una 'unidad' en el sector de servicios, los precios en el mercado tienden a aumentar casi el doble.
 
 Actividades Terciarias vs Indicador Global de Actividad Economica
 
@@ -122,8 +127,35 @@ ggplot(data = inegi_data, aes(x = Importaciones_totales, y = Exportaciones_Total
     title= "Exportaciones Totales vs Importaciones Totales", x = "Importaciones Totales", y="Exportaciones Totales")+
   theme_bw()
 ```
+El análisis de regresión lineal realizado muestra que existe una relación muy fuerte y significativa entre las exportaciones totales y las importaciones totales. Los resultados indican que estas dos variables tienden a moverse casi al unísono: cuando aumentan las importaciones, las exportaciones también crecen en una magnitud muy similar. De hecho, la mayor parte de las variaciones observadas en las exportaciones están estrechamente vinculadas a los cambios en las importaciones, lo que evidencia una sincronía notable entre ambas variables
 
-Este análisis de regresión lineal revela una conexión muy fuerte y significativa entre lo que vendemos al extranjero (exportaciones totales) y lo que compramos de otros países (importaciones totales). Los números sugieren que estas dos variables se mueven casi en sincronía: por cada aumento en nuestras compras del exterior, nuestras ventas al exterior crecen en una cantidad muy similar. De hecho, casi todos los cambios que vemos en nuestras exportaciones parecen estar estrechamente ligados a lo que sucede con nuestras importaciones.
+
+Cetes 28 dias + IPC BMV
+```{r}
+library(plotly)
+
+
+plot_ly(
+  data = inegi_data,
+  x = ~Tipo_Cambio_Nominal,
+  y = ~IPC_BMV,
+  z = ~Cetes_28_Dias,
+  type = "scatter3d",
+  mode = "markers",
+  marker = list(size = 4, color = Cetes28 dias, colorscale = "Viridis"),
+  text = ~paste("Cetes:", Cetes_28_Dias,
+                "<br>Tipo de cambio:", Tipo_Cambio_Nominal,
+                "<br>IPC:", IPC_BMV)
+) %>%
+  layout(
+    title = "Dispersión 3D: Cetes vs Tipo de Cambio e IPC BMV,
+    scene = list(
+      xaxis = list(title = "Tipo de Cambio Nominal"),
+      yaxis = list(title = "IPC BMV"),
+      zaxis = list(title = "Cetes 28 Días")
+    )
+  )
+
 
 
 
@@ -145,27 +177,8 @@ ggplot(data = inegi_data, aes(x = Indicador_Global_Actividad_Economica, y = Acti
   theme_bw()
 ```
 
-Los resultados de nuestro modelo indican que el IGAE es un buen indicador para entender y anticipar el comportamiento de la actividad industrial. La relación entre ambos es significativa. Por cada unidad que crece la economía (IGAE), la actividad industrial muestra un incremento importante. Incluso en un escenario económico nulo, la industria parece mantener un nivel de actividad constante. Además, el IGAE explica una gran parte (alrededor del 92%) de por qué la actividad industrial sube o baja."
+Los resultados de nuestro modelo muestran que el Indicador Global de la Actividad Económica (IGAE) es un excelente referente para comprender y prever la evolución de la actividad industrial. La relación entre ambos es estadísticamente significativa, evidenciando que por cada unidad que crece el IGAE, la actividad industrial experimenta un aumento considerable. Incluso en escenarios donde la economía no presenta crecimiento, la industria mantiene un nivel de actividad estable. Además, el IGAE explica aproximadamente el 92% de la variabilidad en la actividad industrial, lo que subraya su capacidad predictiva y su estrecha vinculación con el desempeño del sector industrial.
 
-
-
-Regresiones Lineales Múltiples
-
-
-Precios al Consumidor - Actividades Terciarias + Precio Promedio de Petróleo Crudo
-
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-modelo <- lm(Indicador_Global_Actividad_Economica ~ Actividades_Terciarias + Precio_Promedio_Petroleo_Crudo, data = inegi_data)
-print("Modelo de Regresión Lineal Múltiple")
-summary(modelo)
-```
-
-```{r webgl=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
-scatter3d(Indicador_Global_Actividad_Economica ~ Actividades_Terciarias + Precio_Promedio_Petroleo_Crudo, data= inegi_data, fit="linear", residuals=TRUE, bg="white", axis.scales=TRUE, 
-  grid=TRUE, ellipsoid=FALSE)
-```
-
-La economía general (IGAE) responde de manera diferente a los cambios en las actividades terciarias y en el precio del petróleo crudo. Nuestro modelo muestra que el IGAE es mucho más sensible a las fluctuaciones en el sector de servicios que a las variaciones en el precio del crudo. Un aumento en las actividades terciarias tiene un impacto considerablemente mayor en el crecimiento económico que un aumento de la misma magnitud en el precio del petróleo. Esto sugiere que la salud y el dinamismo del sector de servicios son cruciales para el crecimiento del IGAE, mucho más que las variaciones en el precio del crudo.
 
 
 Indicador Global de Actividad Económica y Actividades Primarias + Actividad Industrial
@@ -180,41 +193,9 @@ summary(modelo)
 scatter3d(Indicador_Global_Actividad_Economica ~ Actividades_Primarias + Actividad_Industrial, data= inegi_data, fit="linear", residuals=TRUE, bg="white", axis.scales=TRUE, 
   grid=TRUE, ellipsoid=FALSE)
 ```
-
-Al analizar cómo diferentes sectores impactan la economía general (IGAE), encontramos que tanto las actividades primarias (como la agricultura y la minería) como la actividad industrial juegan un papel. Sin embargo, nuestro modelo sugiere que la industria tiene un peso mucho mayor. Por cada 'empujón' en la actividad industrial, la economía tiende a crecer significativamente más que por un 'empujón' equivalente en las actividades primarias. Esto indica que la industria es un motor más potente para el crecimiento económico, al menos según este análisis.
-
-Tendencia de Empleo Manufacturero y Actividad Industrial + Importaciones No Petroleras
-
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-modelo <- lm(Tendencia_Empleo_Manufacturas ~ Actividad_Industrial + Importaciones_No_Petroleras, data = inegi_data)
-print("Modelo de Regresión Lineal Múltiple")
-summary(modelo)
-```
-
-```{r webgl=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
-scatter3d(Tendencia_Empleo_Manufacturas ~ Actividad_Industrial + Importaciones_No_Petroleras, data= inegi_data, fit="linear", residuals=TRUE, bg="white", axis.scales=TRUE, 
-  grid=TRUE, ellipsoid=FALSE)
-```
-
-Al analizar qué factores impulsan la creación de empleos en la industria manufacturera, nuestro modelo muestra que tanto la actividad industrial en general como las importaciones de bienes que no son petróleo tienen un impacto positivo y significativo. Sin embargo, la actividad industrial parece ser un motor mucho más fuerte. Por cada 'empujón' en la actividad industrial, la cantidad de empleos en el sector manufacturero tiende a crecer de forma notablemente mayor que ante un aumento equivalente en las importaciones no petroleras. Esto sugiere que fortalecer la industria local tiene un efecto mucho más directo en la generación de empleo manufacturero que el nivel de importaciones no petroleras.
+Al examinar el impacto de distintos sectores sobre la economía general medida por el IGAE, se observa que tanto las actividades primarias (como la agricultura y la minería) como la industria contribuyen al crecimiento económico. Sin embargo, el análisis indica que la industria tiene una influencia mucho más significativa. Cada incremento en la actividad industrial impulsa el crecimiento económico en una proporción considerablemente mayor que un aumento equivalente en las actividades primarias. Esto refleja que, dentro de la estructura económica actual, el sector industrial actúa como un motor clave y más potente para el desarrollo económico
 
 
-Indicador Global de Actividad Económica y Precios al Consumidor Subyacente + Precios al Consumidor 
-
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-modelo <- lm(Indicador_Global_Actividad_Economica ~ Precios_Consumidor_Subyacente + Precios_Consumidor, data = inegi_data)
-print("Modelo de Regresión Lineal Múltiple")
-summary(modelo)
-```
-
-```{r webgl=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
-scatter3d(Indicador_Global_Actividad_Economica ~ Precios_Consumidor_Subyacente + Precios_Consumidor, data= inegi_data, fit="linear", residuals=TRUE, bg="white", axis.scales=TRUE, 
-  grid=TRUE, ellipsoid=FALSE)
-```
-
-Al analizar qué factores impactan la economía general (IGAE), nuestro modelo muestra una conexión entre los precios subyacentes (que excluyen elementos volátiles como alimentos y energía) y la inflación general (precios al consumidor). Sin embargo, la inflación general parece tener una influencia débil en la economía, según este análisis. Por otro lado, los precios subyacentes sí muestran una relación más clara: cuando estos aumentan, la economía tiende a crecer. Esto sugiere que la inflación 'de fondo' tiene un impacto más notable en la actividad económica que la inflación general, cuyo efecto no es tan claro en este modelo.
-
- 
 
 Análisis de Correlación 
 
@@ -232,88 +213,44 @@ corrplot(corr_matrix)
 ```
 
 
-Regresiones Lineales Simples
+Microsoft vs Google
 
-
-
-Apple vs Oracle 
-
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-modelo <- lm(AAPL.Close ~ ORCL.Close, data = e_cierre) 
+ lm(MSFT.Close ~ GOOGL.Close, data = e_cierre) 
 
 print("Modelo de Regresión Lineal:")
 summary(modelo)
-```
 
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-ggplot(data = e_cierre, aes(x = ORCL.Close, y = AAPL.Close))+
-  geom_point(color = "blue", size = 2)+
-  geom_smooth(method = "lm", formula = y ~ x, color = "orange", se=FALSE)+
+ggplot(data = e_cierre, aes(x = GOOGL.Close, y = MSFT.Close))+
+  geom_point(color = "darkgreen", size = 2)+
+  geom_smooth(method = "lm", formula = y ~ x, color = "red", se=FALSE)+
   labs(
-    title= "Apple vs Oracle", x = "Oracle", y="Apple")+
-  theme_bw()
+    title= "Microsoft vs Google", x = "Google (GOOGL)", y="Microsoft (MSFT)")+
+  theme_minimal()
 ```
 
-Este análisis revela una relación positiva y consistente entre el precio de cierre de las acciones de Apple y el precio de cierre de las acciones de Oracle. Los movimientos en el precio de Oracle explican una parte considerable (casi el 84%) de por qué el precio de Apple sube o baja, lo que convierte a Oracle en un buen indicador para anticipar los cambios en el precio de Apple. Además, encontramos que por cada dólar que aumenta el precio de cierre de Oracle, el precio de cierre de Apple tiende a incrementarse en una proporción similar, lo que subraya su conexión
+El modelo de regresión lineal muestra una relación positiva y significativa entre los precios de cierre de Google y Microsoft. Esto indica que, generalmente, cuando el precio de Google sube, el de Microsoft también tiende a aumentar. El coeficiente de determinación (R²) sugiere que gran parte de la variabilidad en el precio de Microsoft se explica por los cambios en Google.
 
+La gráfica confirma esta relación, con los puntos agrupados cerca de la línea de regresión. Aunque este modelo es útil para identificar la conexión entre ambas acciones, es importante recordar que otros factores externos también influyen en sus precios.
 
-
-Google ~ Microsoft 
-
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-modelo <- lm(GOOGL.Close ~ MSFT.Close, data = e_cierre) 
-
-print("Modelo de Regresión Lineal:")
-summary(modelo)
-```
-
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-ggplot(data = e_cierre, aes(x = MSFT.Close, y = GOOGL.Close))+
-  geom_point(color = "pink", size = 2)+
-  geom_smooth(method = "lm", formula = y ~ x, color = "orange"", se=FALSE)+
-  labs(
-    title= "Google vs Microsoft", x = "Microsoft", y="Google")+
-  theme_bw()
-```
-
-Los datos muestran una relación significativa entre las acciones de Google y Microsoft. El hecho de que el precio de Microsoft explique alrededor del 89% de la variabilidad en el precio de Google indica una fuerte influencia de Microsoft sobre Google. Además, por cada unidad que sube el precio de cierre de Microsoft, se espera un aumento de aproximadamente el 40% de esa unidad en el precio de cierre de Google, lo que confirma una conexión positiva y la capacidad de Microsoft para influir en el precio de Google.
-
-
-Microsoft vs Oracle 
-
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-modelo <- lm(MSFT.Close ~ ORCL.Close, data = e_cierre) 
-
-print("Modelo de Regresión Lineal:")
-summary(modelo)
-```
-
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-ggplot(data = e_cierre, aes(x = ORCL.Close, y = MSFT.Close))+
-  geom_point(color = "pink", size = 2)+
-  geom_smooth(method = "lm", formula = y ~ x, color = "purple", se=FALSE)+
-  labs(
-    title= "Microsoft vs Oracle", x = "Oracle", y="Microsoft")+
-  theme_bw()
-```
-
-Encontramos una relación significativa entre los precios de cierre de Microsoft y Oracle. Los datos nos muestran que más del 83% de los cambios que vemos en el precio de cierre de Microsoft pueden ser explicados por los movimientos en el precio de cierre de Oracle. Además, por cada aumento de un dólar en el precio de cierre de Oracle, el precio de cierre de Microsoft tiende a subir en una cantidad considerable (más de dos dólares), lo que confirma que ambas acciones están positivamente correlacionadas.
 
 #Analisis multiples
 
-Apple - Oracle + Tesla 
 
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-modelo <- lm(AAPL.Close ~ ORCL.Close + TSLA.Close, data = e_cierre)
+modelo <- lm(META.Close ~ MSFT.Close + GOOGL.Close + AMZN.Close, data = e_cierre)
+
 print("Modelo de Regresión Lineal Múltiple")
-summary(modelo)
-```
+print(summary(modelo))
 
-```{r webgl=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
-scatter3d(AAPL.Close ~ ORCL.Close + TSLA.Close, data = e_cierre, fit="linear", residuals=TRUE, bg="white", axis.scales=TRUE, 
-  grid=TRUE, ellipsoid=FALSE)
-```
 
-El precio de cierre de Apple muestra una alta sensibilidad a los movimientos en los precios de cierre de Oracle y Tesla, ya que nuestro modelo explica más del 90% de su variabilidad con estas dos acciones. La respuesta de Apple a un cambio en el precio de Oracle es considerablemente mayor que su respuesta a un cambio de la misma magnitud en el precio de Tesla. Por cada unidad que se mueve el precio de Oracle, el precio de Apple tiende a moverse en una proporción casi igual, manteniendo Tesla constante. En cambio, el movimiento del precio de Tesla tiene un impacto menor en el precio de Apple, manteniendo Oracle constante. Esto indica que Oracle tiene una mayor influencia en el precio de Apple que Tesla."
+scatter3d(META.Close ~ MSFT.Close + GOOGL.Close, data = e_cierre, fit="linear", residuals=TRUE, 
+          bg="white", axis.scales=TRUE, grid=TRUE, ellipsoid=FALSE)
+
+
+
+El modelo indica que los precios de Microsoft, Google y Amazon tienen un efecto positivo y significativo sobre el precio de Facebook. Esto refleja una fuerte relación entre estas empresas tecnológicas. El alto R² sugiere que juntas explican gran parte de la variabilidad en Facebook.
+
+La gráfica 3D visualiza cómo Microsoft y Google se relacionan simultáneamente con Facebook, mostrando la tendencia general del modelo. En conjunto, estos resultados evidencian la interconexión del sector y su impacto en los precios de las acciones.
+
+
 
 
