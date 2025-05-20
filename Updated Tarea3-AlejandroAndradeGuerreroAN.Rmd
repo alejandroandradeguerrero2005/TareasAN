@@ -45,7 +45,7 @@ knitr::knit_hooks$set(webgl = hook_webgl)
 
 
 ```{r}
-inegi_data <- read_xlsx("C:/Users/kelip/OneDrive/Documentos/Análisis Numérico/Tareas/inegi_subdata.xlsx")
+inegi_data <- read_xlsx("C:/Users/AlexAG/OneDrive/Documentos/Downloads/inegi_subdata.xlsx")
 ```
 
 Actividades Primarias vs Terciarias
