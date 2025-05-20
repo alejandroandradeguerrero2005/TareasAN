@@ -1847,40 +1847,4 @@ plt.show()
   
 ```
 
-# Ejercicio 4
 
-De [scipy.stats](@https://docs.scipy.org/doc/scipy/reference/stats.html) elige alguna distribución de probabilidad continua, realiza la gráfica y encuentra la probabilidad que la variable aleatoria tome un valor en un intervalo dado. Compara el resultado con el método `cdf`.
-
-```{python}
-#| code-fold: true
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.stats import norm
-
-dist = norm(loc=0, scale=1)
-
-
-x = np.linspace(-4, 4, 1000)
-pdf_vals = dist.pdf(x)
-
-
-a, b = -1, 1.5
-
-# Gráfica
-plt.figure(figsize=(10, 5))
-plt.plot(x, pdf_vals, label='PDF - Normal(0,1)', color='red')
-plt.fill_between(x, pdf_vals, where=(x > a) & (x < b), color='green', alpha=0.5, label=f'P({a} < X < {b})')
-plt.axvline(a, color='gray', linestyle='--')
-plt.axvline(b, color='gray', linestyle='--')
-plt.title('Distribución Estandar')
-plt.xlabel('x')
-plt.ylabel('Densidad')
-plt.legend()
-plt.grid(True)
-plt.show()
-
-# Probabilidad
-prob_cdf = dist.cdf(b) - dist.cdf(a)
-print(f"P({a} < X < {b}) usando CDF: {prob_cdf:.4f}")
-
-```
